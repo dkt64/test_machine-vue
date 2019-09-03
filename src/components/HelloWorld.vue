@@ -17,7 +17,7 @@
 
       <v-container class="grey lighten-5">
         <v-row no-gutters>
-          <v-col cols="4">
+          <v-col cols="3">
             <p class="text-left">TCP position:</p>
             <p class="text-left">{{txtTCPx}}</p>
             <p class="text-left">{{txtTCPy}}</p>
@@ -84,16 +84,28 @@
             </v-flex>
           </v-col>
 
-          <v-col cols="8">
+          <v-col cols="9">
             <v-flex xs12 mb-5>
               <v-layout>
                 <Scene @before-render$="beforeRender" v-model="myScene">
-                  <Camera type="arcRotate" :radius="100" :target="[0, 5, 0]" v-model="myCamera"></Camera>
+                  <Camera
+                    type="arcRotate"
+                    :alpha="Math.PI*5/4"
+                    :beta="Math.PI/3"
+                    :radius="100"
+                    :target="[0, 10, 0]"
+                    v-model="myCamera"
+                  ></Camera>
 
                   <HemisphericLight diffuse="#888"></HemisphericLight>
 
                   <!-- Światło punktowe z żarówką -->
-                  <PointLight :position="[0,200,0]" specular="#FFF" diffuse="#FFF" v-model="myLight"></PointLight>
+                  <PointLight
+                    :position="[0,200,0]"
+                    specular="#FFF"
+                    diffuse="#FFF"
+                    v-model="myLight"
+                  ></PointLight>
                   <Sphere :position="[0, 200, 0]" :scaling="[3, 3, 3]">
                     <Material specular="#FFF" diffuse="#FFF"></Material>
                   </Sphere>
@@ -106,7 +118,7 @@
                     :position="[0, 0, 0]"
                     :scaling="[100, 100, 100]"
                   >
-                    <Material diffuse="#F00">
+                    <Material diffuse="#AAA">
                       <Texture type="ambient" src="textura.png" v-model="myTexture"></Texture>
                     </Material>
                   </Plane>
@@ -142,7 +154,7 @@
                           <Texture type="diffuse" src="textura.png"></Texture>
                         </Material>
                       </Cylinder>
-                      <Box :rotation="[0,0,0]" :position="[0, 13, 0]" :scaling="[3, 10, 2]">
+                      <Box :rotation="[0,0,0]" :position="[0, 13, 0]" :scaling="[2.5, 10, 1.5]">
                         <Material diffuse="#2FF">
                           <Texture type="diffuse" src="textura.png"></Texture>
                         </Material>
@@ -153,7 +165,7 @@
                         <Cylinder
                           :rotation="[Math.PI/2,0,0]"
                           :position="[0, 18, 0]"
-                          :scaling="[3.5, 1.5, 3.5]"
+                          :scaling="[3.2, 1.2, 3.2]"
                         >
                           <Material diffuse="#2F5">
                             <Texture type="diffuse" src="textura.png"></Texture>
@@ -162,7 +174,7 @@
                         <Cylinder
                           :rotation="[0,0,0]"
                           :position="[0, 22, 0]"
-                          :scaling="[2.2, 4.2, 2.2]"
+                          :scaling="[2.0, 4.2, 2.0]"
                         >
                           <Material diffuse="#2F5">
                             <Texture type="diffuse" src="textura.png"></Texture>
@@ -174,7 +186,7 @@
                           <Cylinder
                             :rotation="[0,Math.PI/2,0]"
                             :position="[0, 25, 0]"
-                            :scaling="[2.0, 5, 2.0]"
+                            :scaling="[1.8, 5, 1.8]"
                           >
                             <Material diffuse="#F52">
                               <Texture type="diffuse" src="textura.png"></Texture>
@@ -186,7 +198,7 @@
                             <Cylinder
                               :rotation="[Math.PI/2,0,0]"
                               :position="[0, 30, 0]"
-                              :scaling="[2.5, 1, 2.5]"
+                              :scaling="[2.5, 0.9, 2.5]"
                             >
                               <Material diffuse="#F0F">
                                 <Texture type="diffuse" src="textura.png"></Texture>
@@ -195,7 +207,7 @@
                             <Box
                               :rotation="[0,0,0]"
                               :position="[0, 32, 0]"
-                              :scaling="[1.5, 4, 1.5]"
+                              :scaling="[1.2, 4, 1.2]"
                             >
                               <Material diffuse="#F0F">
                                 <Texture type="diffuse" src="textura.png"></Texture>
@@ -207,7 +219,7 @@
                               <Cylinder
                                 :rotation="[0,Math.PI/2,0]"
                                 :position="[0, 34, 0]"
-                                :scaling="[2.5, 0.5, 2.5]"
+                                :scaling="[2.0, 0.5, 2.0]"
                               >
                                 <Material diffuse="#FFF">
                                   <Texture type="diffuse" src="textura.png"></Texture>
@@ -252,6 +264,7 @@
                 </Scene>
               </v-layout>
             </v-flex>
+            <p class="text-left">{{angles_calculated_txt}}</p>
           </v-col>
         </v-row>
       </v-container>
@@ -260,8 +273,23 @@
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
+
 import { Vector3 } from "@babylonjs/core/Maths/math";
+// import { Curve3 } from "@babylonjs/core/Maths/math";
+
+const Kinematics = require("kinematics").default;
+//import { Kinematics } from "kinematics";
+
+let geometry = [
+  [0, 0, 0], // V0: 1x 1y
+  [0, 18, 0], // V1: 10y
+  [15, 0, 0], // V2: 5x
+  [15, 0, 0], // V3: 3x
+  [0, 2, 0] // V4: -3y
+];
+
+const RobotKin = new Kinematics(geometry);
 
 export default {
   data: () => ({
@@ -284,8 +312,8 @@ export default {
     myVector6: new Vector3(0, 32, 0),
     Tool: null,
     range1: null,
-    range2: null,
-    range3: null,
+    range2: 20,
+    range3: 90,
     range4: null,
     range5: null,
     range6: null,
@@ -296,6 +324,7 @@ export default {
     txtTCPx: "X = 0.0",
     txtTCPy: "Y = 0.0",
     txtTCPz: "Z = 0.0",
+    angles_calculated_txt: null,
     importantLinks: [
       {
         text: "DTP",
@@ -314,6 +343,12 @@ export default {
   created() {
     // eslint-disable-next-line
     console.log("Scene created...");
+
+    let angles = [1.57, 1.2, 0.1, 0.3, 2.2, 1.1];
+    let pose = RobotKin.forward(...angles)[5];
+
+    // eslint-disable-next-line
+    console.log("pose = " + pose);
 
     // axios
     //   .get("http://localhost:8090/")
@@ -346,16 +381,11 @@ export default {
       this.Axis4.setPivotPoint(this.myVector4);
       this.Axis5.setPivotPoint(this.myVector5);
       this.Axis6.setPivotPoint(this.myVector6);
-      // this.Tool.setPivotPoint(this.myVector6);
 
       // TCP
       this.myTCP_dst.position.x = this.myTCP_src.position.x + this.tcp.x;
       this.myTCP_dst.position.y = this.myTCP_src.position.y + this.tcp.y;
       this.myTCP_dst.position.z = this.myTCP_src.position.z + this.tcp.z;
-
-      this.txtTCPx = "X = " + this.myTCP_dst.absolutePosition.x.toFixed(2);
-      this.txtTCPy = "Y = " + this.myTCP_dst.absolutePosition.y.toFixed(2);
-      this.txtTCPz = "Z = " + this.myTCP_dst.absolutePosition.z.toFixed(2);
 
       // Obroty
       if (this.hand_mode) {
@@ -368,8 +398,6 @@ export default {
       } else {
         this.Axis1.rotation.y = (this.range1 * Math.PI) / 180.0;
         this.Axis2.rotation.z = (this.range2 * Math.PI) / 180.0;
-        // this.Axis2.rotation.z =
-        //   (20 * Math.PI) / 2 + Math.sin(this.time / 500) / 3;
 
         this.Axis3.rotation.z =
           (this.range3 * Math.PI) / 180.0 + Math.sin(this.time / 400) / 3;
@@ -381,8 +409,62 @@ export default {
           (this.range5 * Math.PI) / 180.0 + Math.sin(this.time / 200) / 2;
 
         this.Axis6.rotation.y = (this.range6 * Math.PI) / 180.0;
-        // this.Axis6.rotation.y += 0.04;
       }
+
+      // Przedstawienie pozycji
+
+      let angles = [
+        this.Axis1.rotation.y,
+        this.Axis2.rotation.z,
+        this.Axis3.rotation.z,
+        this.Axis4.rotation.y,
+        this.Axis5.rotation.z,
+        this.Axis6.rotation.y
+      ];
+
+      let pose = RobotKin.forward(...angles)[5];
+
+      this.txtTCPx =
+        "Xr = " +
+        this.myTCP_dst.absolutePosition.x.toFixed(2) +
+        ", Xc = " +
+        pose[0].toFixed(2);
+
+      this.txtTCPy =
+        "Yr = " +
+        this.myTCP_dst.absolutePosition.y.toFixed(2) +
+        ", Yc = " +
+        pose[1].toFixed(2);
+
+      this.txtTCPz =
+        "Zr = " +
+        this.myTCP_dst.absolutePosition.z.toFixed(2) +
+        ", Zc = " +
+        pose[2].toFixed(2);
+
+      // Przedstawienie obliczonych wartości dla osi
+      let angles_calculated = RobotKin.inverse(
+        this.myTCP_dst.absolutePosition.x,
+        this.myTCP_dst.absolutePosition.y,
+        this.myTCP_dst.absolutePosition.z,
+        0,
+        0,
+        0
+      );
+
+      this.angles_calculated_txt =
+        "Calculated inverse geometry for axes - A1: " +
+        angles_calculated[0].toFixed(2) +
+        ", A2: " +
+        angles_calculated[1].toFixed(2) +
+        ", A3: " +
+        angles_calculated[2].toFixed(2) +
+        ", A4: " +
+        angles_calculated[3].toFixed(2) +
+        ", A5: " +
+        angles_calculated[4].toFixed(2) +
+        ", A6: " +
+        angles_calculated[5].toFixed(2);
     }
   }
 };
