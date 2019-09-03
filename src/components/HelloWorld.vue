@@ -137,7 +137,7 @@
 
                   <!-- Robot - oś 1 -->
                   <Entity v-model="Axis1">
-                    <Cylinder :position="[0, 3, 0]" :scaling="[6, 3, 6]">
+                    <Cylinder :position="[0, 3, 0]" :scaling="[6, 3, 6]" v-model="A1pos">
                       <Material diffuse="#FFF">
                         <Texture type="diffuse" src="textura.png"></Texture>
                       </Material>
@@ -149,6 +149,7 @@
                         :rotation="[Math.PI/2,0,0]"
                         :position="[0, 7, 0]"
                         :scaling="[4, 2, 4]"
+                        v-model="A2pos"
                       >
                         <Material diffuse="#2FF">
                           <Texture type="diffuse" src="textura.png"></Texture>
@@ -166,6 +167,7 @@
                           :rotation="[Math.PI/2,0,0]"
                           :position="[0, 18, 0]"
                           :scaling="[3.2, 1.2, 3.2]"
+                          v-model="A3pos"
                         >
                           <Material diffuse="#2F5">
                             <Texture type="diffuse" src="textura.png"></Texture>
@@ -187,6 +189,7 @@
                             :rotation="[0,Math.PI/2,0]"
                             :position="[0, 25, 0]"
                             :scaling="[1.8, 5, 1.8]"
+                            v-model="A4pos"
                           >
                             <Material diffuse="#F52">
                               <Texture type="diffuse" src="textura.png"></Texture>
@@ -199,6 +202,7 @@
                               :rotation="[Math.PI/2,0,0]"
                               :position="[0, 30, 0]"
                               :scaling="[2.5, 0.9, 2.5]"
+                              v-model="A5pos"
                             >
                               <Material diffuse="#F0F">
                                 <Texture type="diffuse" src="textura.png"></Texture>
@@ -220,6 +224,7 @@
                                 :rotation="[0,Math.PI/2,0]"
                                 :position="[0, 34, 0]"
                                 :scaling="[2.0, 0.5, 2.0]"
+                                v-model="A6pos"
                               >
                                 <Material diffuse="#FFF">
                                   <Texture type="diffuse" src="textura.png"></Texture>
@@ -265,6 +270,10 @@
               </v-layout>
             </v-flex>
             <p class="text-left">{{angles_calculated_txt}}</p>
+            <p class="text-left">{{axis3_from_model_txt}}</p>
+            <p class="text-left">{{axis4_from_model_txt}}</p>
+            <p class="text-left">{{axis5_from_model_txt}}</p>
+            <p class="text-left">{{axis6_from_model_txt}}</p>
           </v-col>
         </v-row>
       </v-container>
@@ -282,11 +291,11 @@ const Kinematics = require("kinematics").default;
 //import { Kinematics } from "kinematics";
 
 let geometry = [
-  [0, 0, 0], // V0: 1x 1y
-  [0, 18, 0], // V1: 10y
-  [15, 0, 0], // V2: 5x
-  [15, 0, 0], // V3: 3x
-  [0, 2, 0] // V4: -3y
+  [0, 8, 0], // V0: 1x 1y
+  [0, 10, 0], // V1: 10y
+  [7, 0, 0], // V2: 5x
+  [5, 0, 0], // V3: 3x
+  [0, -4, 0] // V4: -3y
 ];
 
 const RobotKin = new Kinematics(geometry);
@@ -304,6 +313,22 @@ export default {
     Axis4: null,
     Axis5: null,
     Axis6: null,
+    A1: null,
+    A2: null,
+    A3: null,
+    A4: null,
+    A5: null,
+    A6: null,
+    A1pos: null,
+    A2pos: null,
+    A3pos: null,
+    A4pos: null,
+    A5pos: null,
+    A6pos: null,
+    axis3_from_model_txt: null,
+    axis4_from_model_txt: null,
+    axis5_from_model_txt: null,
+    axis6_from_model_txt: null,
     machine: null,
     myVector2: new Vector3(0, 7, 0),
     myVector3: new Vector3(0, 18, 0),
@@ -320,7 +345,7 @@ export default {
     hand_mode: null,
     myTCP_dst: null,
     myTCP_src: null,
-    tcp: new Vector3(0, 3, 0),
+    tcp: new Vector3(0, 0, 0),
     txtTCPx: "X = 0.0",
     txtTCPy: "Y = 0.0",
     txtTCPz: "Z = 0.0",
@@ -382,46 +407,69 @@ export default {
       this.Axis5.setPivotPoint(this.myVector5);
       this.Axis6.setPivotPoint(this.myVector6);
 
+      this.axis3_from_model_txt = "A3pos";
+      this.axis3_from_model_txt +=
+        " X[" + this.A3pos.absolutePosition.x.toFixed(2) + "]";
+      this.axis3_from_model_txt +=
+        " Y[" + this.A3pos.absolutePosition.y.toFixed(2) + "]";
+      this.axis3_from_model_txt +=
+        " Z[" + this.A3pos.absolutePosition.z.toFixed(2) + "]";
+
+      this.axis4_from_model_txt = "A4pos";
+      this.axis4_from_model_txt +=
+        " X[" + this.A4pos.absolutePosition.x.toFixed(2) + "]";
+      this.axis4_from_model_txt +=
+        " Y[" + this.A4pos.absolutePosition.y.toFixed(2) + "]";
+      this.axis4_from_model_txt +=
+        " Z[" + this.A4pos.absolutePosition.z.toFixed(2) + "]";
+
+      this.axis5_from_model_txt = "A5pos";
+      this.axis5_from_model_txt +=
+        " X[" + this.A5pos.absolutePosition.x.toFixed(2) + "]";
+      this.axis5_from_model_txt +=
+        " Y[" + this.A5pos.absolutePosition.y.toFixed(2) + "]";
+      this.axis5_from_model_txt +=
+        " Z[" + this.A5pos.absolutePosition.z.toFixed(2) + "]";
+
+      this.axis6_from_model_txt = "A6pos";
+      this.axis6_from_model_txt +=
+        " X[" + this.A6pos.absolutePosition.x.toFixed(2) + "]";
+      this.axis6_from_model_txt +=
+        " Y[" + this.A6pos.absolutePosition.y.toFixed(2) + "]";
+      this.axis6_from_model_txt +=
+        " Z[" + this.A6pos.absolutePosition.z.toFixed(2) + "]";
+
       // TCP
       this.myTCP_dst.position.x = this.myTCP_src.position.x + this.tcp.x;
-      this.myTCP_dst.position.y = this.myTCP_src.position.y + this.tcp.y;
-      this.myTCP_dst.position.z = this.myTCP_src.position.z + this.tcp.z;
+      this.myTCP_dst.position.z = this.myTCP_src.position.y + this.tcp.z;
+      this.myTCP_dst.position.y = this.myTCP_src.position.z + this.tcp.y;
 
       // Obroty
       if (this.hand_mode) {
-        this.Axis1.rotation.y = (this.range1 * Math.PI) / 180.0;
-        this.Axis2.rotation.z = (this.range2 * Math.PI) / 180.0;
-        this.Axis3.rotation.z = (this.range3 * Math.PI) / 180.0;
-        this.Axis4.rotation.y = (this.range4 * Math.PI) / 180.0;
-        this.Axis5.rotation.z = (this.range5 * Math.PI) / 180.0;
-        this.Axis6.rotation.y = (this.range6 * Math.PI) / 180.0;
+        this.A1 = (this.range1 * Math.PI) / 180.0;
+        this.A2 = (this.range2 * Math.PI) / 180.0;
+        this.A3 = (this.range3 * Math.PI) / 180.0;
+        this.A4 = (this.range4 * Math.PI) / 180.0;
+        this.A5 = (this.range5 * Math.PI) / 180.0;
+        this.A6 = (this.range6 * Math.PI) / 180.0;
       } else {
-        this.Axis1.rotation.y = (this.range1 * Math.PI) / 180.0;
-        this.Axis2.rotation.z = (this.range2 * Math.PI) / 180.0;
+        this.A1 = (this.range1 * Math.PI) / 180.0;
+        this.A2 = (this.range2 * Math.PI) / 180.0;
 
-        this.Axis3.rotation.z =
+        this.A3 =
           (this.range3 * Math.PI) / 180.0 + Math.sin(this.time / 400) / 3;
 
-        this.Axis4.rotation.y =
+        this.A4 =
           (this.range4 * Math.PI) / 180.0 + Math.sin(this.time / 300) / 1;
 
-        this.Axis5.rotation.z =
+        this.A5 =
           (this.range5 * Math.PI) / 180.0 + Math.sin(this.time / 200) / 2;
 
-        this.Axis6.rotation.y = (this.range6 * Math.PI) / 180.0;
+        this.A6 = (this.range6 * Math.PI) / 180.0;
       }
 
       // Przedstawienie pozycji
-
-      let angles = [
-        this.Axis1.rotation.y,
-        this.Axis2.rotation.z,
-        this.Axis3.rotation.z,
-        this.Axis4.rotation.y,
-        this.Axis5.rotation.z,
-        this.Axis6.rotation.y
-      ];
-
+      let angles = [this.A1, this.A2, this.A3, this.A4, this.A4, this.A5];
       let pose = RobotKin.forward(...angles)[5];
 
       this.txtTCPx =
@@ -465,6 +513,14 @@ export default {
         angles_calculated[4].toFixed(2) +
         ", A6: " +
         angles_calculated[5].toFixed(2);
+
+      // Obroty - wizualizacja - dodanie kąta
+      this.Axis1.rotation.y = this.A1;
+      this.Axis2.rotation.z = this.A2;
+      this.Axis3.rotation.z = this.A3 + Math.PI / 2;
+      this.Axis4.rotation.y = this.A4;
+      this.Axis5.rotation.z = this.A5 + Math.PI / 2;
+      this.Axis6.rotation.y = this.A6;
     }
   }
 };
