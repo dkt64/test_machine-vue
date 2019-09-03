@@ -18,6 +18,11 @@
       <v-container class="grey lighten-5">
         <v-row no-gutters>
           <v-col cols="4">
+            <p class="text-left">TCP position:</p>
+            <p class="text-left">{{txtTCPx}}</p>
+            <p class="text-left">{{txtTCPy}}</p>
+            <p class="text-left">{{txtTCPz}}</p>
+
             <!-- Slidery do zmiany pozycji osi -->
             <v-switch v-model="hand_mode" class="ma-2" label="Hand mode"></v-switch>
             <v-spacer></v-spacer>
@@ -88,10 +93,23 @@
                   <HemisphericLight diffuse="#888"></HemisphericLight>
 
                   <!-- Światło punktowe z żarówką -->
-                  <PointLight :position="[0,50,0]" specular="#FFF" diffuse="#FFF" v-model="myLight"></PointLight>
-                  <Sphere :position="[0, 50, 0]" :scaling="[3, 3, 3]" v-model="mySphere">
+                  <PointLight :position="[0,200,0]" specular="#FFF" diffuse="#FFF" v-model="myLight"></PointLight>
+                  <Sphere :position="[0, 200, 0]" :scaling="[3, 3, 3]">
                     <Material specular="#FFF" diffuse="#FFF"></Material>
                   </Sphere>
+
+                  <!-- Podłoga -->
+                  <Plane
+                    :height="2"
+                    :width="1"
+                    :rotation="[Math.PI/2,0,0]"
+                    :position="[0, 0, 0]"
+                    :scaling="[100, 100, 100]"
+                  >
+                    <Material diffuse="#F00">
+                      <Texture type="ambient" src="textura.png" v-model="myTexture"></Texture>
+                    </Material>
+                  </Plane>
 
                   <!-- Robot - podstawa -->
                   <Cylinder :position="[0, 1, 0]" :scaling="[10, 2, 10]">
@@ -216,9 +234,14 @@
                                   :rotation="[0,0,Math.PI/2]"
                                   :position="[0, 34.5, 0]"
                                   :scaling="[0.5, 4.5, 1]"
+                                  v-model="myTCP_src"
                                 >
                                   <Material diffuse="#F00"></Material>
                                 </Box>
+                                <!-- Robot - punkt TCP -->
+                                <Sphere :scaling="[1, 1, 1]" v-model="myTCP_dst">
+                                  <Material specular="#FFF" diffuse="#FFF"></Material>
+                                </Sphere>
                               </Entity>
                             </Entity>
                           </Entity>
@@ -226,20 +249,6 @@
                       </Entity>
                     </Entity>
                   </Entity>
-
-                  <!-- Podłoga -->
-                  <Plane
-                    :height="2"
-                    :width="1"
-                    :rotation="[Math.PI/2,0,0]"
-                    :position="[0, 0, 0]"
-                    :scaling="[100, 100, 100]"
-                    v-model="myPlane"
-                  >
-                    <Material diffuse="#F00">
-                      <Texture type="ambient" src="textura.png" v-model="myTexture"></Texture>
-                    </Material>
-                  </Plane>
                 </Scene>
               </v-layout>
             </v-flex>
@@ -281,6 +290,12 @@ export default {
     range5: null,
     range6: null,
     hand_mode: null,
+    myTCP_dst: null,
+    myTCP_src: null,
+    tcp: new Vector3(0, 3, 0),
+    txtTCPx: "X = 0.0",
+    txtTCPy: "Y = 0.0",
+    txtTCPz: "Z = 0.0",
     importantLinks: [
       {
         text: "DTP",
@@ -300,19 +315,16 @@ export default {
     // eslint-disable-next-line
     console.log("Scene created...");
 
-    // eslint-disable-next-line
-    console.log(this.myCamera);
+    // axios
+    //   .get("http://localhost:8090/")
+    //   .then(response => (this.machine = response.data));
 
-    axios
-      .get("http://localhost:8090/")
-      .then(response => (this.machine = response.data));
+    // axios.post("http://localhost:8090/", this.time);
 
-    axios.post("http://localhost:8090/", this.time);
-
-    // eslint-disable-next-line
-    console.log("Data posted:");
-    // eslint-disable-next-line
-    console.log(this.machine);
+    // // eslint-disable-next-line
+    // console.log("Data posted:");
+    // // eslint-disable-next-line
+    // console.log(this.machine);
   },
   // watch: {
   //   myScene() {
@@ -334,7 +346,18 @@ export default {
       this.Axis4.setPivotPoint(this.myVector4);
       this.Axis5.setPivotPoint(this.myVector5);
       this.Axis6.setPivotPoint(this.myVector6);
+      // this.Tool.setPivotPoint(this.myVector6);
 
+      // TCP
+      this.myTCP_dst.position.x = this.myTCP_src.position.x + this.tcp.x;
+      this.myTCP_dst.position.y = this.myTCP_src.position.y + this.tcp.y;
+      this.myTCP_dst.position.z = this.myTCP_src.position.z + this.tcp.z;
+
+      this.txtTCPx = "X = " + this.myTCP_dst.absolutePosition.x.toFixed(2);
+      this.txtTCPy = "Y = " + this.myTCP_dst.absolutePosition.y.toFixed(2);
+      this.txtTCPz = "Z = " + this.myTCP_dst.absolutePosition.z.toFixed(2);
+
+      // Obroty
       if (this.hand_mode) {
         this.Axis1.rotation.y = (this.range1 * Math.PI) / 180.0;
         this.Axis2.rotation.z = (this.range2 * Math.PI) / 180.0;
@@ -344,21 +367,21 @@ export default {
         this.Axis6.rotation.y = (this.range6 * Math.PI) / 180.0;
       } else {
         this.Axis1.rotation.y = (this.range1 * Math.PI) / 180.0;
-
         this.Axis2.rotation.z = (this.range2 * Math.PI) / 180.0;
         // this.Axis2.rotation.z =
         //   (20 * Math.PI) / 2 + Math.sin(this.time / 500) / 3;
 
         this.Axis3.rotation.z =
-          (45 * Math.PI) / 2 + Math.sin(this.time / 400) / 3;
+          (this.range3 * Math.PI) / 180.0 + Math.sin(this.time / 400) / 3;
 
         this.Axis4.rotation.y =
-          (0 * Math.PI) / 2 + Math.sin(this.time / 300) / 1;
+          (this.range4 * Math.PI) / 180.0 + Math.sin(this.time / 300) / 1;
 
         this.Axis5.rotation.z =
-          (0 * Math.PI) / 2 + Math.sin(this.time / 200) / 2;
+          (this.range5 * Math.PI) / 180.0 + Math.sin(this.time / 200) / 2;
 
-        this.Axis6.rotation.y += 0.04;
+        this.Axis6.rotation.y = (this.range6 * Math.PI) / 180.0;
+        // this.Axis6.rotation.y += 0.04;
       }
     }
   }
